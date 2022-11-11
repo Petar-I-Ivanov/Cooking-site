@@ -1,0 +1,101 @@
+﻿@model PagedList.IPagedList<CookingSite.Models.Recipe>
+@using PagedList.Mvc;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Recipes";
+}
+
+<h2>Recipes</h2>
+
+@if (ViewBag.AdminFuncShow == "Yes")
+{
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+}
+
+@if (ViewBag.FunctionShow == "Yes")
+{
+    using (Html.BeginForm("Index", "Recipe", FormMethod.Get))
+    {
+        <p>
+            Find by Category Title / Recipe Title: @Html.TextBox("Search", ViewBag.CurrentFilter as string)
+            <input type="submit" value="Search" />
+        </p>
+    }
+}
+
+<table class="table">
+    <tr>
+        <th>
+            Category
+        </th>
+        <th>
+            @if (ViewBag.FunctionShow == "Yes")
+            {
+                @Html.ActionLink("Title", "Index", new { sortOrder = ViewBag.TitleSort, currentFilter = ViewBag.CurrentFilter })
+            }
+            else
+            {
+                <p>Title</p>
+            }
+        </th>
+        <th>
+            Desription
+        </th>
+        <th>
+            Needed products
+        </th>
+        <th>
+            Date of publish
+        </th>
+        <th></th>
+        @if (ViewBag.AdminFuncShow == "Yes")
+        {
+            <th></th>
+        }
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Desription)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NeededProducts)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PublishedDate)
+            </td>
+            <td>
+                <a href="/Comment?Search=@item.Title">Comments</a>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a href="/Comment/UserCreate/@item.Id">Add comment</a>
+                }
+            </td>
+            @if (ViewBag.AdminFuncShow == "Yes")
+            {
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                </td>
+            }
+        </tr>
+    }
+
+</table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

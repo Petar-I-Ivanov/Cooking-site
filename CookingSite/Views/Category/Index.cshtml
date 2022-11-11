@@ -1,0 +1,80 @@
+﻿@model PagedList.IPagedList<CookingSite.Models.Category>
+@using PagedList.Mvc;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+@{
+    ViewBag.Title = "Categories";
+}
+
+<h2>Categories</h2>
+
+@if (ViewBag.AdminFuncShow == "Yes")
+{
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+}
+
+@if (ViewBag.FunctionShow == "Yes")
+{
+    using (Html.BeginForm("Index", "Category", FormMethod.Get))
+    {
+        <p>
+            Find by Title / Description: @Html.TextBox("Search", ViewBag.CurrentFilter as string)
+            <input type="submit" value="Search" />
+        </p>
+    }
+}
+
+<table class="table" width="100%">
+    <tr>
+        <th>
+            @if (ViewBag.FunctionShow == "Yes")
+            {
+                @Html.ActionLink("Title", "Index", new { sortOrder = ViewBag.TitleSort, currentFilter = ViewBag.CurrentFilter })
+            }
+            else
+            {
+                <p>Title</p>
+            }
+        </th>
+        <th>
+            Description
+        </th>
+        <th>
+            Image
+        </th>
+        @if (ViewBag.AdminFuncShow == "Yes")
+        {
+            <th></th>
+        }
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                <a href='/Recipe?Search=@item.Title'>@Html.DisplayFor(modelItem => item.Title)</a>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Desription)
+            </td>
+            <td>
+                <img src="@Url.Content(item.ImagePath)" width="400" />
+            </td>
+            @if (ViewBag.AdminFuncShow == "Yes")
+            {
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+                    @Html.ActionLink("Details", "Details", new { id = item.Id }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+                </td>
+            }
+        </tr>
+    }
+
+</table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
